@@ -21,8 +21,10 @@ export class IndexedDBSignalStore<T> {
   readonly count = computed(() => this._data().length);
   private autoSyncEffectInitialized = false;
 
+  // eslint-disable-next-line @angular-eslint/prefer-inject
   constructor(private readonly storeName: string) {
     // Effect will be initialized lazily when needed within injection context
+    // storeName is a required parameter, not an injected dependency
   }
 
   /**
