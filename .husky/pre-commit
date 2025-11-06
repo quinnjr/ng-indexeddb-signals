@@ -1,0 +1,13 @@
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+echo ""
+
+echo "📝 Running linter..."
+pnpm lint || {
+  echo "❌ Linting failed. Please fix the errors before committing."
+  exit 1
+}
+
+echo ""
+echo "✅ Pre-commit checks passed!"

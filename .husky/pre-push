@@ -1,0 +1,123 @@
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+echo ""
+
+# Check for linear commit history (no merge commits)
+echo "📊 Checking commit history..."
+
+remote_name="${1:-origin}"
+has_stdin=false
+
+# Pre-push hook receives input via stdin in format:
+# <local_ref> <local_sha> <remote_ref> <remote_sha>
+# Check if stdin has data
+if [ -t 0 ]; then
+  # No stdin, check current branch
+  branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [ -n "$branch_name" ]; then
+    remote_branch="refs/remotes/${remote_name}/${branch_name}"
+    if git rev-parse --verify "$remote_branch" >/dev/null 2>&1; then
+      base_commit=$(git merge-base "$remote_branch" HEAD)
+      commit_range="${base_commit}..HEAD"
+    else
+      # New branch, check all commits
+      commit_range="HEAD"
+    fi
+    has_stdin=false
+  fi
+else
+  # Has stdin, process each ref being pushed
+  while read -r local_ref local_sha remote_ref remote_sha; do
+    has_stdin=true
+    # Skip if this is a delete operation
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+      continue
+    fi
+
+    # Skip if this is a new branch (no local sha)
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+      continue
+    fi
+
+    # Get the branch name from the ref
+    branch_name=$(echo "$local_ref" | sed 's|refs/heads/||')
+
+    # Determine the commit range to check
+    if [ "$remote_sha" != "0000000000000000000000000000000000000000" ]; then
+      # Branch exists on remote, check commits between remote and local
+      base_commit="$remote_sha"
+      commit_range="${base_commit}..${local_sha}"
+    else
+      # New branch, check all commits up to the local sha
+      commit_range="$local_sha"
+    fi
+
+    # Check for merge commits in the range
+    merge_commits=$(git log --merges --oneline "$commit_range" 2>/dev/null | wc -l | tr -d ' ')
+
+    if [ "$merge_commits" -gt 0 ]; then
+      echo "❌ Merge commits detected in branch '$branch_name'! Linear commit history is required."
+      echo ""
+      echo "Found $merge_commits merge commit(s):"
+      git log --merges --oneline "$commit_range" 2>/dev/null
+      echo ""
+      echo "To fix this:"
+      echo "  1. Use 'git rebase' instead of 'git merge' when updating your branch"
+      echo "  2. Rebase your branch: git rebase ${remote_name}/${branch_name}"
+      if [ "$remote_sha" != "0000000000000000000000000000000000000000" ]; then
+        echo "  3. Or use interactive rebase: git rebase -i ${base_commit}"
+      fi
+      echo ""
+      exit 1
+    fi
+  done
+fi
+
+# If no stdin was processed, check the current branch
+if [ "$has_stdin" = false ] && [ -n "$branch_name" ]; then
+  merge_commits=$(git log --merges --oneline "$commit_range" 2>/dev/null | wc -l | tr -d ' ')
+
+  if [ "$merge_commits" -gt 0 ]; then
+    echo "❌ Merge commits detected in branch '$branch_name'! Linear commit history is required."
+    echo ""
+    echo "Found $merge_commits merge commit(s):"
+    git log --merges --oneline "$commit_range" 2>/dev/null
+    echo ""
+    echo "To fix this:"
+    echo "  1. Use 'git rebase' instead of 'git merge' when updating your branch"
+    echo "  2. Rebase your branch: git rebase ${remote_name}/${branch_name}"
+    if [ -n "$base_commit" ]; then
+      echo "  3. Or use interactive rebase: git rebase -i ${base_commit}"
+    fi
+    echo ""
+    exit 1
+  fi
+fi
+
+echo "✅ Commit history is linear"
+echo ""
+
+echo "📝 Running linter..."
+pnpm lint || {
+  echo "❌ Linting failed. Please fix the errors before pushing."
+  exit 1
+}
+
+echo ""
+echo "🧪 Running unit tests..."
+pnpm test || {
+  echo "❌ Unit tests failed. Please fix the tests before pushing."
+  exit 1
+}
+
+echo ""
+echo "🎭 Running e2e tests..."
+pnpm e2e || {
+  echo "❌ E2E tests failed. Please fix the tests before pushing."
+  exit 1
+}
+
+echo ""
+echo "✅ All checks passed! Proceeding with push..."
+

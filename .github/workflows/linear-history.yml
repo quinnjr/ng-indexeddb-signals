@@ -1,0 +1,45 @@
+name: Check Linear Commit History
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  linear-history:
+    name: Check Linear Commit History
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for merge commits
+        run: |
+          echo "📊 Checking commit history for merge commits..."
+
+          # Get the base and head commits
+          BASE_SHA=$(git merge-base origin/${{ github.base_ref }} HEAD)
+          HEAD_SHA=HEAD
+
+          echo "Checking commits between $BASE_SHA and $HEAD_SHA"
+
+          # Check for merge commits in the PR
+          MERGE_COMMITS=$(git log --merges --oneline "$BASE_SHA..$HEAD_SHA" | wc -l | tr -d ' ')
+
+          if [ "$MERGE_COMMITS" -gt 0 ]; then
+            echo "❌ Merge commits detected! Linear commit history is required."
+            echo ""
+            echo "Found $MERGE_COMMITS merge commit(s):"
+            git log --merges --oneline "$BASE_SHA..$HEAD_SHA"
+            echo ""
+            echo "To fix this:"
+            echo "  1. Use 'git rebase' instead of 'git merge' when updating your branch"
+            echo "  2. Rebase your branch: git rebase origin/${{ github.base_ref }}"
+            echo "  3. Or use interactive rebase: git rebase -i $BASE_SHA"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ Commit history is linear (no merge commits found)"
+

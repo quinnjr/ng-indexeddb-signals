@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./demo-dist",
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "bundler",
+    "declaration": false,
+    "sourceMap": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["demo/**/*.ts", "src/lib/**/*.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+}

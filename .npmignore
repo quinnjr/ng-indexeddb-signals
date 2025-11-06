@@ -1,0 +1,74 @@
+# Source files
+src/
+demo/
+e2e/
+
+# Test files
+*.spec.ts
+*.test.ts
+**/*.spec.ts
+**/*.test.ts
+
+# Configuration files
+*.config.ts
+*.config.js
+*.config.mjs
+tsconfig*.json
+vitest.config.ts
+playwright.config.ts
+vite.demo.config.ts
+eslint.config.mjs
+.prettierrc
+.prettierignore
+
+# Build tooling
+.vscode/
+.idea/
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Documentation (keep README.md)
+# README.md is included by default
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Environment
+.env
+.env.*
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package manager
+pnpm-lock.yaml
+pnpm-workspace.yaml
+package-lock.json
+yarn.lock
+
+# Only publish the built dist/ directory
+# The "files" field in package.json should handle this, but this is a backup
