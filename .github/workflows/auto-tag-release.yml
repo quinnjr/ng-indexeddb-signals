@@ -1,0 +1,69 @@
+name: Auto Tag Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'package.json'
+
+jobs:
+  tag-release:
+    name: Tag Release
+    runs-on: ubuntu-latest
+    # Only run if commit message indicates a release merge
+    # GitHub merge commits typically have format: "Merge pull request #X from owner/release/version"
+    if: |
+      contains(github.event.head_commit.message, 'release/') ||
+      contains(github.event.head_commit.message, 'release:') ||
+      contains(github.event.head_commit.message, 'chore: release')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Detected version: $VERSION"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          TAG="v${{ steps.get_version.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️  Tag $TAG already exists, skipping tag creation"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Tag $TAG does not exist, will create it"
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          TAG="v${{ steps.get_version.outputs.version }}"
+          COMMIT_SHA="${{ github.sha }}"
+
+          echo "🏷️  Creating tag: $TAG"
+          echo "📍 At commit: $COMMIT_SHA"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$TAG" -m "Release $TAG" "$COMMIT_SHA"
+          git push origin "$TAG"
+
+          echo "✅ Successfully created and pushed tag: $TAG"
+
