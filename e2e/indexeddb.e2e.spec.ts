@@ -2,11 +2,24 @@ import { test, expect } from '@playwright/test';
 
 test.describe('IndexedDB Signals E2E', () => {
   test.beforeEach(async ({ page }) => {
+    // Listen for console errors
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        console.log('Browser console error:', msg.text());
+      }
+    });
+
+    page.on('pageerror', error => {
+      console.log('Page error:', error.message);
+    });
+
     await page.goto('/');
-    // Wait for Angular to bootstrap
-    await page.waitForLoadState('networkidle');
-    // Wait a bit more for Angular to initialize
-    await page.waitForTimeout(1000);
+    // Wait for Angular to bootstrap - use domcontentloaded instead of networkidle
+    await page.waitForLoadState('domcontentloaded');
+    // Wait for the app root to be rendered
+    await page.waitForSelector('app-root', { timeout: 10000 });
+    // Wait a bit more for Angular to initialize and IndexedDB to connect
+    await page.waitForTimeout(2000);
   });
 
   test('should initialize IndexedDB and show connection status', async ({ page }) => {

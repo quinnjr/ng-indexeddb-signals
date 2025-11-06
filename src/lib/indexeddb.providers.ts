@@ -28,7 +28,15 @@ export function provideIndexedDB(config: IndexedDBConfig): EnvironmentProviders 
     {
       provide: APP_INITIALIZER,
       useFactory: (indexedDB: IndexedDBService) => {
-        return () => indexedDB.initialize(config);
+        return () => {
+          // Initialize IndexedDB, but don't block app startup if it fails
+          return indexedDB.initialize(config).catch(error => {
+            console.error('Failed to initialize IndexedDB:', error);
+            // Don't throw - allow app to continue even if IndexedDB fails
+            // The service will handle the error state via signals
+            return Promise.resolve();
+          });
+        };
       },
       deps: [IndexedDBService],
       multi: true,

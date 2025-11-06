@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed, effect } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IndexedDBService } from '../src/lib/indexeddb.service';
@@ -25,9 +25,9 @@ interface TestItem {
       <h1>IndexedDB Signals Demo</h1>
 
       <div class="status-section">
-        <div data-testid="connection-status">Status: {{ statusText }}</div>
-        <div data-testid="item-count">Items: {{ itemCount }}</div>
-        <div data-testid="loading" *ngIf="isLoading">Loading...</div>
+        <div data-testid="connection-status">Status: {{ connectionStatus() }}</div>
+        <div data-testid="item-count">Items: {{ itemStore.count() }}</div>
+        <div data-testid="loading" *ngIf="itemStore.loading()">Loading...</div>
       </div>
 
       <div class="form-section">
@@ -53,7 +53,7 @@ interface TestItem {
         >
           Add Item
         </button>
-        <button type="button" (click)="clearAll()" [disabled]="isEmpty" data-testid="clear-button">
+        <button type="button" (click)="clearAll()" [disabled]="itemStore.isEmpty()" data-testid="clear-button">
           Clear All
         </button>
       </div>
@@ -61,8 +61,8 @@ interface TestItem {
       <div class="list-section">
         <h2>Items</h2>
         <div data-testid="item-list">
-          <div *ngIf="isEmpty" class="empty">No items</div>
-          <div *ngFor="let item of items; let i = index" class="item">
+          <div *ngIf="itemStore.isEmpty()" class="empty">No items</div>
+          <div *ngFor="let item of itemStore.data(); let i = index" class="item">
             <span>{{ item.name }}: {{ item.value }}</span>
             <button type="button" (click)="deleteItem(item.id!)" data-testid="delete-button">
               Delete
@@ -163,31 +163,9 @@ export class AppComponent implements OnInit {
     }
   });
 
-  // Template-friendly properties to avoid call expression warnings
-  // These are updated via effects to stay in sync with signals
-  statusText = 'Disconnected';
-  itemCount = 0;
-  isLoading = false;
-  isEmpty = true;
-  items: TestItem[] = [];
-
   constructor() {
-    // Update template properties when signals change
-    effect(() => {
-      this.statusText = this.connectionStatus();
-    });
-    effect(() => {
-      this.itemCount = this.itemStore.count();
-    });
-    effect(() => {
-      this.isLoading = this.itemStore.loading();
-    });
-    effect(() => {
-      this.isEmpty = this.itemStore.isEmpty();
-    });
-    effect(() => {
-      this.items = this.itemStore.data();
-    });
+    // No need for effects - signals are used directly in template
+    // This is the recommended approach for zoneless Angular
   }
 
   async ngOnInit() {
