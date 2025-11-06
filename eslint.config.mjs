@@ -47,7 +47,6 @@ export default tseslint.config(
       '@angular-eslint/use-pipe-transform-interface': 'error',
       '@angular-eslint/no-conflicting-lifecycle': 'error',
       '@angular-eslint/use-component-view-encapsulation': 'warn',
-      '@angular-eslint/no-host-metadata-property': 'error',
       '@angular-eslint/no-input-rename': 'error',
       '@angular-eslint/no-output-rename': 'error',
       '@angular-eslint/use-component-selector': 'error',
