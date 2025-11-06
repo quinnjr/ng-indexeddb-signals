@@ -3,6 +3,34 @@
 echo "🔍 Running pre-commit checks..."
 echo ""
 
+# Prevent direct commits to main/master/develop branches
+echo "🌿 Checking branch protection..."
+
+branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ -z "$branch_name" ]; then
+  echo "❌ Could not determine branch name"
+  exit 1
+fi
+
+# Check if trying to commit directly to protected branches
+if [ "$branch_name" = "main" ] || [ "$branch_name" = "master" ] || [ "$branch_name" = "develop" ]; then
+  echo "❌ Direct commits to '$branch_name' branch are not allowed!"
+  echo ""
+  echo "Protected branches: main, master, develop"
+  echo ""
+  echo "Please create a feature branch instead:"
+  echo "  git checkout -b feature/your-feature-name"
+  echo ""
+  echo "Or if you're on a protected branch, switch to a feature branch:"
+  echo "  git checkout -b feature/your-feature-name"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Branch '$branch_name' is not a protected branch"
+echo ""
+
 echo "📝 Running linter..."
 pnpm lint || {
   echo "❌ Linting failed. Please fix the errors before committing."

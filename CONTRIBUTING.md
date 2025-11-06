@@ -59,11 +59,31 @@ pnpm install
 
 ## Development Workflow
 
-1. **Create a feature branch** from `main`:
+1. **Create a feature branch** from `main` using git-flow naming:
 
    ```bash
-   git checkout -b feat/your-feature-name
+   git checkout -b feature/your-feature-name
    ```
+
+   **Branch naming convention** (enforced by pre-push hook):
+   - `feature/feature-name` - New features
+   - `bugfix/bug-name` - Bug fixes
+   - `hotfix/hotfix-name` - Hotfixes
+   - `release/release-name` - Release branches
+   - `chore/chore-name` - Maintenance tasks
+   - `docs/docs-name` - Documentation changes
+   - `refactor/refactor-name` - Code refactoring
+   - `test/test-name` - Test-related changes
+   - `perf/perf-name` - Performance improvements
+   - `ci/ci-name` - CI/CD changes
+   - `build/build-name` - Build system changes
+
+   **⚠️ Important Branch Protection Rules:**
+   - Direct commits to `main`, `master`, or `develop` are **not allowed**
+   - All changes must be made via feature branches and merged through pull requests
+   - **Only `release/*` branches can merge into `main` or `master`**
+   - Feature/bugfix/hotfix branches should merge into `develop`
+   - This is enforced by pre-commit hooks, pre-push hooks, and GitHub workflows
 
 2. **Make your changes** following the code style guidelines
 
@@ -80,10 +100,40 @@ pnpm install
 5. **Push your branch**:
 
    ```bash
-   git push -u origin feat/your-feature-name
+   git push -u origin feature/your-feature-name
    ```
 
 6. **Create a Pull Request** on GitHub
+   - **Branch targeting rules:**
+     - Feature/bugfix/hotfix branches → target `develop`
+     - Release branches → target `main` or `master` (only way to update main)
+   - Source branch must follow git-flow naming convention
+   - All CI checks must pass before merging
+   - At least one approval may be required (depending on repository settings)
+   - **Use the appropriate PR template** based on your branch type:
+     - `feature/*` → Use "Feature" template
+     - `bugfix/*` → Use "Bug Fix" template
+     - `release/*` → Use "Release" template
+     - `hotfix/*` → Use "Hotfix" template
+     - `chore/*`, `docs/*`, `refactor/*`, etc. → Use "Chore / Maintenance" template
+
+   **Example workflow:**
+   ```bash
+   # Feature development
+   git checkout -b feature/new-feature
+   # ... make changes ...
+   git push origin feature/new-feature
+   # Create PR: feature/new-feature → develop
+   # Select "Feature" template when creating PR
+
+   # Release process
+   git checkout develop
+   git checkout -b release/1.0.0
+   # ... prepare release ...
+   git push origin release/1.0.0
+   # Create PR: release/1.0.0 → main
+   # Select "Release" template when creating PR
+   ```
 
 ## Code Style
 
@@ -235,6 +285,9 @@ Before submitting a PR, ensure:
 - [ ] Documentation is updated
 - [ ] Commit messages follow conventional format
 - [ ] Branch has linear commit history (no merge commits)
+- [ ] PR targets the correct branch:
+  - [ ] Feature/bugfix/hotfix branches target `develop`
+  - [ ] Release branches target `main` or `master` (only way to update main)
 
 ## Reporting Bugs
 

@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/quinnjr/ng-indexeddb-signals#readme
+    about: Check the README for usage examples and API documentation
+  - name: Contributing Guide
+    url: https://github.com/quinnjr/ng-indexeddb-signals/blob/main/CONTRIBUTING.md
+    about: Read our contributing guidelines before opening a PR
+

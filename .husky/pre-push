@@ -3,6 +3,90 @@
 echo "🔍 Running pre-push checks..."
 echo ""
 
+# Check branch name follows git-flow format
+echo "🌿 Checking branch name format..."
+
+branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+# Allowed branch patterns:
+# - main, master, develop (main branches)
+# - feature/feature-name
+# - bugfix/bug-name
+# - hotfix/hotfix-name
+# - release/release-name
+# - chore/chore-name
+# - docs/docs-name
+# - refactor/refactor-name
+# - test/test-name
+# - perf/perf-name
+# - ci/ci-name
+# - build/build-name
+
+if [ -z "$branch_name" ]; then
+  echo "❌ Could not determine branch name"
+  exit 1
+fi
+
+# Check if trying to push directly to protected branches
+if [ "$branch_name" = "main" ] || [ "$branch_name" = "master" ] || [ "$branch_name" = "develop" ]; then
+  echo "❌ Direct pushes to protected branch '$branch_name' are not allowed!"
+  echo ""
+  echo "Protected branches: main, master, develop"
+  echo ""
+  echo "All changes to protected branches must come via:"
+  echo "  - Pull requests from feature/bugfix/hotfix branches"
+  echo "  - Merged pull requests (not direct pushes)"
+  echo ""
+  echo "Please create a feature branch instead:"
+  echo "  git checkout -b feature/your-feature-name"
+  echo ""
+  echo "Or if you're on a protected branch, switch to a feature branch:"
+  echo "  git checkout -b feature/your-feature-name"
+  echo ""
+  exit 1
+else
+  # Check if branch follows git-flow format
+  pattern="^(feature|bugfix|hotfix|release|chore|docs|refactor|test|perf|ci|build)/.+"
+
+  if ! echo "$branch_name" | grep -qE "$pattern"; then
+    echo "❌ Branch name '$branch_name' does not follow git-flow format!"
+    echo ""
+    echo "Branch names must follow the format: <type>/<name>"
+    echo ""
+    echo "Allowed types:"
+    echo "  feature  - New features"
+    echo "  bugfix   - Bug fixes"
+    echo "  hotfix   - Hotfixes"
+    echo "  release  - Release branches"
+    echo "  chore    - Maintenance tasks"
+    echo "  docs     - Documentation changes"
+    echo "  refactor - Code refactoring"
+    echo "  test     - Test-related changes"
+    echo "  perf     - Performance improvements"
+    echo "  ci       - CI/CD changes"
+    echo "  build    - Build system changes"
+    echo ""
+    echo "Main branches (main, master, develop) are also allowed."
+    echo ""
+    echo "Examples:"
+    echo "  ✅ feature/add-user-authentication"
+    echo "  ✅ bugfix/fix-indexeddb-connection"
+    echo "  ✅ hotfix/critical-security-patch"
+    echo "  ❌ my-feature"
+    echo "  ❌ add-user-auth"
+    echo "  ❌ feature_add_user_auth"
+    echo ""
+    echo "To rename your current branch:"
+    echo "  git branch -m <type>/<new-name>"
+    echo ""
+    exit 1
+  fi
+
+  echo "✅ Branch '$branch_name' follows git-flow format"
+fi
+
+echo ""
+
 # Check for linear commit history (no merge commits)
 echo "📊 Checking commit history..."
 

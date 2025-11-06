@@ -1,0 +1,144 @@
+name: Branch Protection
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  check-branch-protection:
+    name: Check Branch Protection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for direct pushes to protected branches
+        if: github.event_name == 'push'
+        run: |
+          echo "🔒 Checking branch protection rules..."
+          echo ""
+
+          protected_branches=("main" "master" "develop")
+          current_branch="${GITHUB_REF#refs/heads/}"
+
+          echo "Current branch: $current_branch"
+          echo ""
+
+          # Check if current branch is a protected branch
+          for branch in "${protected_branches[@]}"; do
+            if [ "$current_branch" = "$branch" ]; then
+              echo "❌ Direct push to protected branch '$branch' detected!"
+              echo ""
+              echo "Protected branches (main, master, develop) should only receive changes via:"
+              echo "  - Pull requests from feature/bugfix/hotfix branches"
+              echo "  - Merged pull requests (not direct pushes)"
+              echo ""
+              echo "To fix this:"
+              echo "  1. Create a feature branch: git checkout -b feature/your-feature-name"
+              echo "  2. Push your changes to the feature branch"
+              echo "  3. Create a pull request to merge into $branch"
+              echo ""
+              echo "If this is a legitimate emergency hotfix, please:"
+              echo "  1. Create a hotfix branch: git checkout -b hotfix/your-hotfix-name"
+              echo "  2. Make your changes"
+              echo "  3. Create a pull request"
+              echo ""
+              exit 1
+            fi
+          done
+
+          echo "✅ Branch protection check passed"
+
+      - name: Check PR source branch format
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔒 Checking pull request source branch..."
+          echo ""
+
+          source_branch="${{ github.head_ref }}"
+          target_branch="${{ github.base_ref }}"
+
+          echo "Source branch: $source_branch"
+          echo "Target branch: $target_branch"
+          echo ""
+
+          # Check if trying to merge into main/master
+          if [[ "$target_branch" =~ ^(main|master)$ ]]; then
+            # Only release branches can merge into main/master
+            if [[ "$source_branch" =~ ^release/.+ ]]; then
+              echo "✅ Release branch '$source_branch' can merge into '$target_branch'"
+            else
+              echo "❌ Only release branches can merge into '$target_branch'!"
+              echo ""
+              echo "Branch protection rule:"
+              echo "  - Only 'release/*' branches can be merged into main/master"
+              echo "  - Feature/bugfix/hotfix branches should merge into 'develop'"
+              echo ""
+              echo "Current PR:"
+              echo "  Source: $source_branch"
+              echo "  Target: $target_branch"
+              echo ""
+              echo "To fix this:"
+              if [[ "$source_branch" =~ ^(feature|bugfix|chore|docs|refactor|test|perf|ci|build)/.+ ]]; then
+                echo "  1. Change PR target to 'develop' instead of '$target_branch'"
+                echo "  2. Or create a release branch: git checkout -b release/version-number"
+                echo "  3. Merge your feature branch into the release branch"
+                echo "  4. Create a PR from release branch to '$target_branch'"
+              elif [[ "$source_branch" =~ ^hotfix/.+ ]]; then
+                echo "  1. Hotfix branches can merge into main/master, but consider using a release branch"
+                echo "  2. Or create a release branch: git checkout -b release/version-number"
+                echo "  3. Merge your hotfix into the release branch"
+                echo "  4. Create a PR from release branch to '$target_branch'"
+              else
+                echo "  1. Create a release branch: git checkout -b release/version-number"
+                echo "  2. Merge your changes into the release branch"
+                echo "  3. Create a PR from release branch to '$target_branch'"
+              fi
+              echo ""
+              exit 1
+            fi
+          # Check if trying to merge into develop
+          elif [[ "$target_branch" = "develop" ]]; then
+            # Feature/bugfix/hotfix branches can merge into develop
+            if [[ "$source_branch" =~ ^(feature|bugfix|hotfix|chore|docs|refactor|test|perf|ci|build)/.+ ]]; then
+              echo "✅ Branch '$source_branch' can merge into 'develop'"
+            elif [[ "$source_branch" =~ ^release/.+ ]]; then
+              echo "⚠️  Warning: Release branches typically merge into main/master, not develop"
+              echo "This PR will proceed, but verify this is intentional."
+            elif [[ "$source_branch" =~ ^(main|master|develop)$ ]]; then
+              echo "❌ Pull request from protected branch '$source_branch' to '$target_branch'!"
+              echo ""
+              echo "You cannot create a pull request from a protected branch."
+              echo "Protected branches should only be targets of pull requests, not sources."
+              echo ""
+              exit 1
+            else
+              echo "⚠️  Warning: Source branch '$source_branch' does not follow git-flow format"
+              echo ""
+              echo "Recommended branch naming: <type>/<name>"
+              echo "Types: feature, bugfix, hotfix, release, chore, docs, refactor, test, perf, ci, build"
+              echo ""
+              echo "This is a warning, not an error. The PR will proceed."
+            fi
+          else
+            # For other target branches, just check format
+            if [[ "$source_branch" =~ ^(feature|bugfix|hotfix|release|chore|docs|refactor|test|perf|ci|build)/.+ ]]; then
+              echo "✅ Source branch '$source_branch' follows git-flow format"
+            elif [[ "$source_branch" =~ ^(main|master|develop)$ ]]; then
+              echo "❌ Pull request from protected branch '$source_branch' to '$target_branch'!"
+              echo ""
+              echo "You cannot create a pull request from a protected branch."
+              echo ""
+              exit 1
+            else
+              echo "⚠️  Warning: Source branch '$source_branch' does not follow git-flow format"
+            fi
+          fi
+
+          echo ""
+          echo "✅ Pull request branch check completed"
+
