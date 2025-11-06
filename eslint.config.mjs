@@ -105,7 +105,12 @@ export default tseslint.config(
     rules: {
       '@angular-eslint/template/button-has-type': 'error',
       '@angular-eslint/template/click-events-have-key-events': 'warn',
-      '@angular-eslint/template/no-call-expression': 'error',
+      '@angular-eslint/template/no-call-expression': [
+        'error',
+        {
+          allowList: ['signal', 'computed'],
+        },
+      ],
       '@angular-eslint/template/no-duplicate-attributes': 'error',
       '@angular-eslint/template/no-interpolation-in-attributes': 'error',
       '@angular-eslint/template/use-track-by-function': 'off',
@@ -117,6 +122,7 @@ export default tseslint.config(
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
       ...angular.configs.tsRecommended,
+      ...angular.configs.templateRecommended,
       prettier,
     ],
     processor: angular.processInlineTemplates,
@@ -129,6 +135,7 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      '@angular-eslint/template/no-call-expression': 'off', // Signals are recommended in zoneless Angular
       'no-console': 'off',
     },
   },
@@ -136,6 +143,7 @@ export default tseslint.config(
     ignores: [
       'dist/**',
       'demo-dist/**',
+      'demo/**', // Demo app - exclude from linting due to inline template processor issues
       'node_modules/**',
       'coverage/**',
       'test-results/**',

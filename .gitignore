@@ -63,3 +63,5 @@ Desktop.ini
 # pnpm-lock.yaml
 # package-lock.json
 # yarn.lock
+dist/
+demo-dist/

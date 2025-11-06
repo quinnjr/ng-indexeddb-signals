@@ -72,3 +72,4 @@ yarn.lock
 
 # Only publish the built dist/ directory
 # The "files" field in package.json should handle this, but this is a backup
+demo-dist/
