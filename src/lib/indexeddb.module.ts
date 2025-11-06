@@ -22,7 +22,10 @@ export class IndexedDBModule {
         unique?: boolean;
       }>;
     }>;
-  }): { ngModule: typeof IndexedDBModule; providers: Array<{ provide: string; useValue: typeof config }> } {
+  }): {
+    ngModule: typeof IndexedDBModule;
+    providers: Array<{ provide: string; useValue: typeof config }>;
+  } {
     return {
       ngModule: IndexedDBModule,
       providers: [

@@ -325,7 +325,12 @@ describe('IndexedDBService', () => {
     });
 
     it('should throw error if database not initialized', async () => {
-      const newService = new IndexedDBService();
+      // Reset and create a fresh TestBed instance for this test
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [IndexedDBService, provideZonelessChangeDetection()],
+      });
+      const newService = TestBed.inject(IndexedDBService);
       await expect(newService.get('test-store', 1)).rejects.toThrow('Database not initialized');
     });
 
@@ -631,37 +636,56 @@ describe('IndexedDBService', () => {
     });
 
     it('should handle close when database is null', () => {
-      const newService = new IndexedDBService();
+      // Reset and create a fresh TestBed instance for this test
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [IndexedDBService, provideZonelessChangeDetection()],
+      });
+      const newService = TestBed.inject(IndexedDBService);
       expect(() => newService.close()).not.toThrow();
     });
   });
 
   describe('error handling for uninitialized database', () => {
+    let uninitializedService: IndexedDBService;
+
+    beforeEach(() => {
+      // Reset and create a fresh TestBed instance for uninitialized service tests
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [IndexedDBService, provideZonelessChangeDetection()],
+      });
+      uninitializedService = TestBed.inject(IndexedDBService);
+    });
+
     it('should throw error for getAll when not initialized', async () => {
-      const newService = new IndexedDBService();
-      await expect(newService.getAll('test-store')).rejects.toThrow('Database not initialized');
+      await expect(uninitializedService.getAll('test-store')).rejects.toThrow(
+        'Database not initialized'
+      );
     });
 
     it('should throw error for put when not initialized', async () => {
-      const newService = new IndexedDBService();
-      await expect(newService.put('test-store', { id: 1 })).rejects.toThrow(
+      await expect(uninitializedService.put('test-store', { id: 1 })).rejects.toThrow(
         'Database not initialized'
       );
     });
 
     it('should throw error for delete when not initialized', async () => {
-      const newService = new IndexedDBService();
-      await expect(newService.delete('test-store', 1)).rejects.toThrow('Database not initialized');
+      await expect(uninitializedService.delete('test-store', 1)).rejects.toThrow(
+        'Database not initialized'
+      );
     });
 
     it('should throw error for clear when not initialized', async () => {
-      const newService = new IndexedDBService();
-      await expect(newService.clear('test-store')).rejects.toThrow('Database not initialized');
+      await expect(uninitializedService.clear('test-store')).rejects.toThrow(
+        'Database not initialized'
+      );
     });
 
     it('should throw error for count when not initialized', async () => {
-      const newService = new IndexedDBService();
-      await expect(newService.count('test-store')).rejects.toThrow('Database not initialized');
+      await expect(uninitializedService.count('test-store')).rejects.toThrow(
+        'Database not initialized'
+      );
     });
   });
 
@@ -724,5 +748,4 @@ describe('IndexedDBService', () => {
       consoleSpy.mockRestore();
     });
   });
-
 });

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Angular 20+ module for IndexedDB with signal-based API",
   "type": "module",
+  "packageManager": "pnpm@8.15.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -33,10 +34,22 @@
   "keywords": [
     "angular",
     "indexeddb",
-    "signals"
+    "signals",
+    "reactive",
+    "storage",
+    "browser",
+    "database"
   ],
-  "author": "",
+  "author": "quinnjr",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quinnjr/ng-indexeddb-signals.git"
+  },
+  "bugs": {
+    "url": "https://github.com/quinnjr/ng-indexeddb-signals/issues"
+  },
+  "homepage": "https://github.com/quinnjr/ng-indexeddb-signals#readme",
   "devDependencies": {
     "@angular-eslint/eslint-plugin": "^18.0.0",
     "@angular-eslint/template-parser": "^18.0.0",

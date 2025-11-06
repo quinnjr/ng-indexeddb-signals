@@ -1,36 +1,81 @@
 # ng-indexeddb-signals
 
-An Angular 20+ module for encapsulating IndexedDB in the browser with a signal-based API. This library provides a reactive, type-safe interface to IndexedDB using Angular signals, effects, and computed values instead of event-based approaches.
+Angular 20+ module for IndexedDB with a signal-based API. This library provides a reactive, zoneless approach to managing IndexedDB operations using Angular Signals.
 
 ## Features
 
-- ✅ **Signal-based API** - Uses Angular signals, effects, and computed values
-- ✅ **Type-safe** - Full TypeScript support with generics
-- ✅ **Reactive** - Automatic data synchronization with signals
-- ✅ **Comprehensive testing** - 85%+ test coverage with unit and e2e tests
-- ✅ **Angular 20+** - Built for modern Angular with standalone components
+- 🚀 **Signal-based API** - Uses Angular Signals, Effects, and Computed properties instead of EventEmitters
+- 🔄 **Reactive Store** - `IndexedDBSignalStore` for automatic synchronization between IndexedDB and signals
+- 🎯 **Zoneless** - Works without Zone.js
+- 🌐 **SSR Support** - Includes state serialization and restoration for server-side rendering
+- ✅ **Type-safe** - Full TypeScript support
+- 🧪 **Well-tested** - Comprehensive unit and E2E tests
 
 ## Installation
 
 ```bash
-pnpm install ng-indexeddb-signals
+pnpm add ng-indexeddb-signals
+# or
+npm install ng-indexeddb-signals
+# or
+yarn add ng-indexeddb-signals
 ```
+
+## Peer Dependencies
+
+- `@angular/core`: `^20.0.0`
+- `tslib`: `^2.8.1`
 
 ## Quick Start
 
-### 1. Initialize the Service
+### 1. Configure in app.config.ts (Recommended)
 
 ```typescript
-import { Component, OnInit, inject } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
+import { provideIndexedDB } from 'ng-indexeddb-signals';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideIndexedDB({
+      name: 'my-database',
+      version: 1,
+      stores: [
+        {
+          name: 'users',
+          keyPath: 'id',
+          autoIncrement: true,
+        },
+      ],
+    }),
+  ],
+};
+```
+
+Then in `main.ts`:
+
+```typescript
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { appConfig } from './app.config';
+
+bootstrapApplication(AppComponent, appConfig);
+```
+
+### Alternative: Initialize in Component
+
+If you prefer to initialize manually, you can still use the service directly:
+
+```typescript
+import { Component, inject, OnInit } from '@angular/core';
 import { IndexedDBService } from 'ng-indexeddb-signals';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  template: `...`,
+  // ...
 })
 export class AppComponent implements OnInit {
-  private readonly indexedDB = inject(IndexedDBService);
+  private indexedDB = inject(IndexedDBService);
 
   async ngOnInit() {
     await this.indexedDB.initialize({
@@ -41,7 +86,6 @@ export class AppComponent implements OnInit {
           name: 'users',
           keyPath: 'id',
           autoIncrement: true,
-          indexes: [{ name: 'email', keyPath: 'email', unique: true }],
         },
       ],
     });
@@ -49,27 +93,27 @@ export class AppComponent implements OnInit {
 }
 ```
 
-### 2. Use Signal Store for Reactive Data
+### 2. Use the Reactive Store
 
 ```typescript
 import { IndexedDBSignalStore } from 'ng-indexeddb-signals';
 
-@Component({
-  providers: [
-    {
-      provide: IndexedDBSignalStore,
-      useFactory: () => new IndexedDBSignalStore<User>('users'),
-    },
-  ],
-})
-export class UserComponent {
-  readonly userStore = inject(IndexedDBSignalStore<User>);
+export class UserService {
+  private userStore = inject(IndexedDBSignalStore<User>);
 
-  // Reactive signals
-  readonly users = this.userStore.data;
-  readonly loading = this.userStore.loading;
-  readonly isEmpty = this.userStore.isEmpty;
-  readonly count = this.userStore.count;
+  constructor() {
+    // Initialize with store name
+    this.userStore = new IndexedDBSignalStore<User>('users');
+  }
+
+  // Access reactive data
+  users = this.userStore.data;
+  userCount = this.userStore.count;
+  isLoading = this.userStore.loading;
+
+  async loadUsers() {
+    await this.userStore.refresh();
+  }
 
   async addUser(user: User) {
     await this.userStore.put(user);
@@ -81,81 +125,129 @@ export class UserComponent {
 }
 ```
 
-### 3. Use in Template
+### 3. Use in Templates
 
 ```html
-<div *ngIf="loading()">Loading...</div>
-<div *ngIf="isEmpty()">No users found</div>
-<div *ngFor="let user of users()">{{ user.name }} - {{ user.email }}</div>
+<div>
+  <p>Users: {{ userService.userCount() }}</p>
+  <p *ngIf="userService.isLoading()">Loading...</p>
+
+  <ul>
+    <li *ngFor="let user of userService.users()">{{ user.name }}</li>
+  </ul>
+</div>
 ```
 
 ## API Reference
 
 ### IndexedDBService
 
-Main service for IndexedDB operations.
-
 #### Methods
 
 - `initialize(config: IndexedDBConfig): Promise<void>` - Initialize the database
-- `get<T>(storeName: string, key: IDBValidKey): Promise<T | undefined>` - Get a single item
-- `getAll<T>(storeName: string, options?: QueryOptions): Promise<T[]>` - Get all items
-- `put<T>(storeName: string, value: T, key?: IDBValidKey): Promise<IDBValidKey>` - Add/update an item
-- `delete(storeName: string, key: IDBValidKey): Promise<void>` - Delete an item
-- `clear(storeName: string): Promise<void>` - Clear all items in a store
-- `count(storeName: string, range?: IDBKeyRange): Promise<number>` - Count items
-- `close(): void` - Close the database connection
+- `get<T>(storeName: string, key: IDBValidKey): Promise<T | undefined>` - Get a value
+- `getAll<T>(storeName: string, options?: GetAllOptions): Promise<T[]>` - Get all values
+- `put<T>(storeName: string, value: T, key?: IDBValidKey): Promise<IDBValidKey>` - Put a value
+- `delete(storeName: string, key: IDBValidKey): Promise<void>` - Delete a value
+- `clear(storeName: string): Promise<void>` - Clear all values
+- `count(storeName: string, range?: IDBKeyRange): Promise<number>` - Count records
 
 #### Signals
 
-- `connectionState: Signal<'opening' | 'open' | 'closed' | 'error'>` - Current connection state
-- `isConnected: Signal<boolean>` - Whether database is connected
-- `isConnecting: Signal<boolean>` - Whether database is connecting
-- `error: Signal<Error | null>` - Current error, if any
+- `connectionState(): ConnectionState` - Current connection state ('connecting' | 'open' | 'closed' | 'error')
+- `error(): Error | null` - Current error, if any
+- `isConnected(): boolean` - Whether the database is connected
+- `isConnecting(): boolean` - Whether the database is connecting
 
 ### IndexedDBSignalStore<T>
-
-Reactive store wrapper with signal-based API.
 
 #### Methods
 
 - `refresh(): Promise<void>` - Refresh data from IndexedDB
-- `get(key: IDBValidKey): Promise<T | undefined>` - Get a single item
-- `put(value: T, key?: IDBValidKey): Promise<IDBValidKey>` - Add/update an item
-- `delete(key: IDBValidKey): Promise<void>` - Delete an item
-- `clear(): Promise<void>` - Clear all items
-- `find(predicate: (item: T) => boolean): T | undefined` - Find item by predicate
-- `filter(predicate: (item: T) => boolean): T[]` - Filter items
-- `createFilteredSignal(predicate: (item: T) => boolean): Signal<T[]>` - Create computed filtered signal
+- `put(value: T): Promise<IDBValidKey>` - Add or update a value
+- `delete(key: IDBValidKey): Promise<void>` - Delete a value
+- `clear(): Promise<void>` - Clear all values
+- `createFilteredSignal(filterFn: (item: T) => boolean): Signal<T[]>` - Create a filtered signal
 
 #### Signals
 
-- `data: Signal<T[]>` - All items in the store
-- `loading: Signal<boolean>` - Whether an operation is in progress
-- `error: Signal<Error | null>` - Current error, if any
-- `isEmpty: Signal<boolean>` - Whether store is empty
-- `count: Signal<number>` - Number of items
+- `data(): T[]` - All data in the store
+- `count(): number` - Number of items
+- `loading(): boolean` - Whether data is loading
+- `isEmpty(): boolean` - Whether the store is empty
+
+## SSR Support
+
+For server-side rendering, you can serialize and restore IndexedDB state:
+
+```typescript
+// On server
+const state = await indexedDBService.serializeState();
+// Send to client
+
+// On client (after hydration)
+await indexedDBService.restoreState(state);
+```
+
+## Development
+
+### Prerequisites
+
+- Node.js 20.x
+- pnpm 8+
+
+### Setup
+
+```bash
+pnpm install
+```
+
+### Development Commands
+
+```bash
+# Run unit tests
+pnpm test
+
+# Run unit tests in watch mode
+pnpm test:watch
+
+# Run E2E tests
+pnpm e2e
+
+# Run linter
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Format code
+pnpm format
+
+# Build library
+pnpm build
+
+# Clean generated files
+pnpm clean
+```
 
 ## Testing
 
-### Unit Tests
+This project uses:
 
-```bash
-pnpm test
-```
+- **Vitest** for unit testing
+- **Playwright** for E2E testing
 
-### Coverage
-
-```bash
-pnpm test:coverage
-```
-
-### E2E Tests
-
-```bash
-pnpm e2e
-```
+All tests must pass before pushing (enforced by Husky hooks).
 
 ## License
 
-MIT
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+
+- All tests pass
+- Code follows the linting rules
+- Commits follow the conventional commit format
+- Linear commit history is maintained

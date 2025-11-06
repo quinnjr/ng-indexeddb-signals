@@ -45,7 +45,12 @@ interface TestItem {
           data-testid="item-value"
           #valueInput="ngModel"
         />
-        <button type="button" (click)="addItem()" [disabled]="!itemName || !itemValue" data-testid="add-button">
+        <button
+          type="button"
+          (click)="addItem()"
+          [disabled]="!itemName || !itemValue"
+          data-testid="add-button"
+        >
           Add Item
         </button>
         <button type="button" (click)="clearAll()" [disabled]="isEmpty" data-testid="clear-button">
@@ -59,7 +64,9 @@ interface TestItem {
           <div *ngIf="isEmpty" class="empty">No items</div>
           <div *ngFor="let item of items; let i = index" class="item">
             <span>{{ item.name }}: {{ item.value }}</span>
-            <button type="button" (click)="deleteItem(item.id!)" data-testid="delete-button">Delete</button>
+            <button type="button" (click)="deleteItem(item.id!)" data-testid="delete-button">
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -185,21 +192,11 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      await this.indexedDB.initialize({
-        name: 'test-db',
-        version: 1,
-        stores: [
-          {
-            name: 'test-store',
-            keyPath: 'id',
-            autoIncrement: true,
-          },
-        ],
-      });
-
+      // IndexedDB is now initialized via app.config.ts
+      // Just refresh the store data
       await this.itemStore.refresh();
     } catch (error) {
-      console.error('Failed to initialize IndexedDB:', error);
+      console.error('Failed to refresh IndexedDB store:', error);
     }
   }
 
