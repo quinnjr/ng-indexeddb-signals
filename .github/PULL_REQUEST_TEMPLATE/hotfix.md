@@ -19,24 +19,31 @@ assignees: ''
 ## Urgency
 
 <!-- Why is this a hotfix? What makes it critical? -->
+
 **Urgency Level:**
+
 - [ ] Critical - Production is down or severely impacted
 - [ ] High - Significant functionality broken
 - [ ] Medium - Important issue affecting users
 
 **Impact:**
+
 <!-- Describe the impact if this hotfix is not deployed -->
 
 ## Issue Description
 
 <!-- Describe the critical issue -->
+
 **Issue:**
+
 <!-- What is the critical issue? -->
 
 **Affected Systems:**
+
 <!-- What systems or features are affected? -->
 
 **User Impact:**
+
 <!-- How are users affected? -->
 
 ## Solution
@@ -46,6 +53,7 @@ assignees: ''
 ## How Has This Been Tested?
 
 <!-- Describe the tests you ran to verify your fix -->
+
 - [ ] Unit tests added/updated
 - [ ] E2E tests added/updated (if applicable)
 - [ ] Manual testing performed
@@ -55,6 +63,7 @@ assignees: ''
 ## Test Coverage
 
 <!-- Ensure test coverage meets 85% threshold -->
+
 - [ ] New code is covered by tests
 - [ ] Coverage report shows ≥85% coverage
 
@@ -76,12 +85,14 @@ assignees: ''
 ## Related Issues
 
 <!-- Link to related issues -->
+
 Fixes #
 Closes #
 
 ## Deployment Plan
 
 <!-- Describe the deployment plan for this hotfix -->
+
 - [ ] Hotfix tested in staging/pre-production
 - [ ] Rollback plan documented
 - [ ] Deployment window identified
@@ -90,6 +101,7 @@ Closes #
 ## Post-Deployment
 
 <!-- What needs to happen after deployment? -->
+
 - [ ] Monitor for issues
 - [ ] Verify fix in production
 - [ ] Merge hotfix back into `develop` branch
@@ -98,4 +110,3 @@ Closes #
 ## Additional Notes
 
 <!-- Any additional information that reviewers should know -->
-

@@ -118,6 +118,7 @@ pnpm install
      - `chore/*`, `docs/*`, `refactor/*`, etc. → Use "Chore / Maintenance" template
 
    **Example workflow:**
+
    ```bash
    # Feature development
    git checkout -b feature/new-feature

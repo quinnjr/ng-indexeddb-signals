@@ -26,14 +26,15 @@ assignees: ''
 
 ## Changes Made
 
-<!-- Describe what was changed -->
--
+## <!-- Describe what was changed -->
+
 -
 -
 
 ## How Has This Been Tested?
 
 <!-- Describe the tests you ran to verify your changes -->
+
 - [ ] Unit tests still pass
 - [ ] E2E tests still pass
 - [ ] Manual testing performed (if applicable)
@@ -42,6 +43,7 @@ assignees: ''
 ## Test Coverage
 
 <!-- Ensure test coverage is maintained -->
+
 - [ ] Test coverage maintained at ≥85%
 - [ ] No decrease in test coverage
 
@@ -61,12 +63,14 @@ assignees: ''
 ## Related Issues
 
 <!-- Link to related issues -->
+
 Closes #
 Relates to #
 
 ## Breaking Changes
 
 <!-- If this chore introduces breaking changes, document them here -->
+
 - [ ] No breaking changes
 - [ ] Breaking changes (document below)
 
@@ -75,4 +79,3 @@ Relates to #
 ## Additional Notes
 
 <!-- Any additional information that reviewers should know -->
-

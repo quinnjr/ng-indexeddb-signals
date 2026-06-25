@@ -22,6 +22,7 @@ assignees: ''
 ## How Has This Been Tested?
 
 <!-- Describe the tests you ran to verify your changes -->
+
 - [ ] Unit tests added/updated
 - [ ] E2E tests added/updated (if applicable)
 - [ ] Manual testing performed
@@ -29,6 +30,7 @@ assignees: ''
 ## Test Coverage
 
 <!-- Ensure test coverage meets 85% threshold -->
+
 - [ ] New code is covered by tests
 - [ ] Coverage report shows ≥85% coverage
 
@@ -50,6 +52,7 @@ assignees: ''
 ## Related Issues
 
 <!-- Link to related issues -->
+
 Closes #
 
 ## Screenshots / Examples
@@ -59,4 +62,3 @@ Closes #
 ## Additional Notes
 
 <!-- Any additional information that reviewers should know -->
-

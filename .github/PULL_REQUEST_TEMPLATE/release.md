@@ -10,6 +10,7 @@ assignees: ''
 
 **Version:** <!-- e.g., 1.0.0 -->
 **Release Type:**
+
 - [ ] Major (breaking changes)
 - [ ] Minor (new features, backward compatible)
 - [ ] Patch (bug fixes, backward compatible)
@@ -19,28 +20,28 @@ assignees: ''
 <!-- Provide a summary of changes in this release -->
 
 ### Added
-<!-- New features -->
--
+
+## <!-- New features -->
 
 ### Changed
-<!-- Changes to existing functionality -->
--
+
+## <!-- Changes to existing functionality -->
 
 ### Fixed
-<!-- Bug fixes -->
--
+
+## <!-- Bug fixes -->
 
 ### Deprecated
-<!-- Soon-to-be removed features -->
--
+
+## <!-- Soon-to-be removed features -->
 
 ### Removed
-<!-- Removed features -->
--
+
+## <!-- Removed features -->
 
 ### Security
-<!-- Security fixes -->
--
+
+## <!-- Security fixes -->
 
 ## Pre-Release Checklist
 
@@ -59,6 +60,7 @@ assignees: ''
 ## Testing
 
 <!-- Describe testing performed for this release -->
+
 - [ ] All unit tests pass
 - [ ] All E2E tests pass
 - [ ] Manual testing completed
@@ -76,10 +78,10 @@ assignees: ''
 ## Related Issues
 
 <!-- Link to related issues or milestones -->
+
 Closes #
 Fixes #
 
 ## Additional Notes
 
 <!-- Any additional information for reviewers or release managers -->
-

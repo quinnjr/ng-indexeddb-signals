@@ -8,6 +8,9 @@ jobs:
   linear-history:
     name: Check Linear Commit History
     runs-on: ubuntu-latest
+    # Exempt Dependabot: its PRs are managed by GitHub and rebased on demand,
+    # and the git-flow gates already do not apply to dependabot[bot] PRs.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

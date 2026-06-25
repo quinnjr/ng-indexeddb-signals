@@ -53,7 +53,12 @@ interface TestItem {
         >
           Add Item
         </button>
-        <button type="button" (click)="clearAll()" [disabled]="itemStore.isEmpty()" data-testid="clear-button">
+        <button
+          type="button"
+          (click)="clearAll()"
+          [disabled]="itemStore.isEmpty()"
+          data-testid="clear-button"
+        >
           Clear All
         </button>
       </div>

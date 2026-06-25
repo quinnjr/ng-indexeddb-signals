@@ -10,6 +10,10 @@ jobs:
   check-branch-protection:
     name: Check Branch Protection
     runs-on: ubuntu-latest
+    # Dependabot PRs use dependabot/* branches targeting the default branch,
+    # which cannot satisfy the git-flow source/target branch rules below.
+    # Exempt Dependabot so its dependency-update PRs are not structurally blocked.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
