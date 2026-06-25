@@ -13,7 +13,11 @@ jobs:
     # Dependabot PRs use dependabot/* branches targeting the default branch,
     # which cannot satisfy the git-flow source/target branch rules below.
     # Exempt Dependabot so its dependency-update PRs are not structurally blocked.
-    if: github.actor != 'dependabot[bot]'
+    # Checks both the triggering actor and the PR author so the exemption holds
+    # even when the run is re-triggered by another actor.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

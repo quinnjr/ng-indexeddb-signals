@@ -10,7 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     # Exempt Dependabot: its PRs are managed by GitHub and rebased on demand,
     # and the git-flow gates already do not apply to dependabot[bot] PRs.
-    if: github.actor != 'dependabot[bot]'
+    # Checks both the triggering actor and the PR author so the exemption holds
+    # even when the run is re-triggered by another actor.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
